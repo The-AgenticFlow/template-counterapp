@@ -1,1 +1,1 @@
-# template-todoapp
+# Counter App
