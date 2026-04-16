@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            min-width: 300px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .counter-display {
+            font-size: 72px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            min-height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        button {
+            width: 70px;
+            height: 70px;
+            border: none;
+            border-radius: 50%;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .decrement-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .decrement-btn:hover:not(:disabled) {
+            background: #ee5a5a;
+            transform: scale(1.1);
+        }
+
+        .increment-btn {
+            background: #51cf66;
+            color: white;
+        }
+
+        .increment-btn:hover:not(:disabled) {
+            background: #40c057;
+            transform: scale(1.1);
+        }
+
+        .loading {
+            display: none;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            display: none;
+            background: #ffe0e0;
+            color: #c92a2a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .error.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Counter App</h1>
+        
+        <div class="counter-display" id="counter">
+            --
+        </div>
+
+        <div class="buttons">
+            <button class="decrement-btn" id="decrementBtn" onclick="decrement()">−</button>
+            <button class="increment-btn" id="incrementBtn" onclick="increment()">+</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <span class="spinner"></span>
+            <span id="loadingText">Loading...</span>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api/counter';
+        
+        const counterEl = document.getElementById('counter');
+        const decrementBtn = document.getElementById('decrementBtn');
+        const incrementBtn = document.getElementById('incrementBtn');
+        const loadingEl = document.getElementById('loading');
+        const loadingText = document.getElementById('loadingText');
+        const errorEl = document.getElementById('error');
+
+        // Initialize counter on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCounter();
+        });
+
+        function showLoading(text = 'Loading...') {
+            loadingText.textContent = text;
+            loadingEl.classList.add('active');
+            errorEl.classList.remove('active');
+            decrementBtn.disabled = true;
+            incrementBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loadingEl.classList.remove('active');
+            decrementBtn.disabled = false;
+            incrementBtn.disabled = false;
+        }
+
+        function showError(message) {
+            errorEl.textContent = message;
+            errorEl.classList.add('active');
+            hideLoading();
+        }
+
+        function hideError() {
+            errorEl.classList.remove('active');
+        }
+
+        async function fetchCounter() {
+            showLoading('Fetching counter...');
+            hideError();
+            
+            try {
+                const response = await fetch(API_BASE);
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                counterEl.textContent = data.count;
+                hideLoading();
+            } catch (error) {
+                console.error('Error fetching counter:', error);
+                showError(`Failed to fetch counter: ${error.message}. Make sure the backend is running on port 3001.`);
+            }
+        }
+
+        async function increment() {
+            showLoading('Incrementing...');
+            hideError();
+            
+            try {
+                const response = await fetch(`${API_BASE}/increment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                counterEl.textContent = data.count;
+                hideLoading();
+            } catch (error) {
+                console.error('Error incrementing:', error);
+                showError(`Failed to increment: ${error.message}`);
+            }
+        }
+
+        async function decrement() {
+            showLoading('Decrementing...');
+            hideError();
+            
+            try {
+                const response = await fetch(`${API_BASE}/decrement`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                counterEl.textContent = data.count;
+                hideLoading();
+            } catch (error) {
+                console.error('Error decrementing:', error);
+                showError(`Failed to decrement: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
