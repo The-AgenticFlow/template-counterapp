@@ -1,0 +1,15 @@
+{
+  "name": "counter-app",
+  "version": "1.0.0",
+  "description": "A simple counter application with CI/CD pipeline",
+  "main": "src/counter.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": ["counter", "ci/cd", "jest"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
