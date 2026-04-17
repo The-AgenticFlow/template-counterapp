@@ -1,20 +1,24 @@
+mod handlers;
+mod models;
+
 use axum::{
     routing::{get, post},
     Router,
 };
-use std::sync::atomic::{AtomicI32, Ordering};
+use std::sync::atomic::AtomicI32;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 
-// Thread-safe counter state using AtomicI32
-struct AppState {
-    counter: AtomicI32,
+// Thread-safe counter state using AtomicI32 wrapped in Arc for sharing
+#[derive(Clone)]
+pub struct AppState {
+    pub counter: Arc<AtomicI32>,
 }
 
 impl AppState {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            counter: AtomicI32::new(0),
+            counter: Arc::new(AtomicI32::new(0)),
         }
     }
 }
@@ -22,7 +26,7 @@ impl AppState {
 #[tokio::main]
 async fn main() {
     // Initialize shared state
-    let state = Arc::new(AppState::new());
+    let state = AppState::new();
 
     // Configure CORS for frontend access
     let cors = CorsLayer::new()
@@ -32,9 +36,9 @@ async fn main() {
 
     // Build router with all three endpoints
     let app = Router::new()
-        .route("/api/counter", get(get_counter))
-        .route("/api/counter/increment", post(increment_counter))
-        .route("/api/counter/decrement", post(decrement_counter))
+        .route("/api/counter", get(handlers::get_counter))
+        .route("/api/counter/increment", post(handlers::increment_counter))
+        .route("/api/counter/decrement", post(handlers::decrement_counter))
         .layer(cors)
         .with_state(state);
 
@@ -54,17 +58,4 @@ async fn main() {
     axum::serve(listener, app)
         .await
         .expect("Failed to start server");
-}
-
-// Placeholder handlers (will be implemented in Segment 3)
-async fn get_counter() -> String {
-    r#"{"count":0}"#.to_string()
-}
-
-async fn increment_counter() -> String {
-    r#"{"count":1}"#.to_string()
-}
-
-async fn decrement_counter() -> String {
-    r#"{"count":0}"#.to_string()
 }
