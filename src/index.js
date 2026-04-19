@@ -1,28 +1,31 @@
 /**
  * Minimal counter module.
- * Provides a simple counter with increment, decrement, and reset operations.
+ * Provides a Counter class with increment, decrement, and reset operations.
  */
 
-function createCounter(initialValue = 0) {
-  let value = initialValue;
+class Counter {
+  constructor(initialValue = 0) {
+    this._value = initialValue;
+  }
 
-  return {
-    increment() {
-      value += 1;
-      return value;
-    },
-    decrement() {
-      value -= 1;
-      return value;
-    },
-    reset() {
-      value = initialValue;
-      return value;
-    },
-    value() {
-      return value;
-    }
-  };
+  get value() {
+    return this._value;
+  }
+
+  increment() {
+    this._value += 1;
+    return this._value;
+  }
+
+  decrement() {
+    this._value -= 1;
+    return this._value;
+  }
+
+  reset() {
+    this._value = 0;
+    return this._value;
+  }
 }
 
-module.exports = { createCounter };
+module.exports = { Counter };

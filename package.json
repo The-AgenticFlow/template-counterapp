@@ -1,12 +1,15 @@
 {
   "name": "counter-app",
   "version": "1.0.0",
-  "description": "A minimal counter app with CI/CD pipeline",
+  "description": "Minimal counter app with Node.js CI/CD",
   "main": "src/index.js",
   "scripts": {
-    "build": "node -e \"require('./src/index.js'); console.log('Build successful')\"",
+    "build": "node src/index.js",
     "test": "node --test test/index.test.js"
   },
   "keywords": [],
-  "license": "ISC"
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
 }

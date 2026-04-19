@@ -1,42 +1,42 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { createCounter } = require('../src/index.js');
+const { Counter } = require('../src/index.js');
 
-describe('createCounter', () => {
-  it('should start with the default value of 0', () => {
-    const counter = createCounter();
-    assert.equal(counter.value(), 0);
+describe('Counter', () => {
+  it('starts at 0 by default', () => {
+    const counter = new Counter();
+    assert.equal(counter.value, 0);
   });
 
-  it('should start with a custom initial value', () => {
-    const counter = createCounter(10);
-    assert.equal(counter.value(), 10);
+  it('starts at a custom initial value', () => {
+    const counter = new Counter(5);
+    assert.equal(counter.value, 5);
   });
 
-  it('should increment the counter', () => {
-    const counter = createCounter();
+  it('increments the value', () => {
+    const counter = new Counter();
     assert.equal(counter.increment(), 1);
-    assert.equal(counter.value(), 1);
+    assert.equal(counter.value, 1);
   });
 
-  it('should decrement the counter', () => {
-    const counter = createCounter(5);
-    assert.equal(counter.decrement(), 4);
-    assert.equal(counter.value(), 4);
+  it('decrements the value', () => {
+    const counter = new Counter();
+    assert.equal(counter.decrement(), -1);
+    assert.equal(counter.value, -1);
   });
 
-  it('should reset the counter to its initial value', () => {
-    const counter = createCounter(3);
+  it('resets to 0', () => {
+    const counter = new Counter(10);
+    assert.equal(counter.reset(), 0);
+    assert.equal(counter.value, 0);
+  });
+
+  it('supports chained operations', () => {
+    const counter = new Counter();
     counter.increment();
     counter.increment();
-    assert.equal(counter.value(), 5);
-    assert.equal(counter.reset(), 3);
-    assert.equal(counter.value(), 3);
-  });
-
-  it('should allow negative values', () => {
-    const counter = createCounter(0);
+    counter.increment();
     counter.decrement();
-    assert.equal(counter.value(), -1);
+    assert.equal(counter.value, 2);
   });
 });
