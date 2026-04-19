@@ -2,10 +2,12 @@
   "name": "counter-app",
   "version": "1.0.0",
   "description": "Minimal counter app with Node.js CI/CD",
+  "main": "src/index.js",
   "scripts": {
     "build": "node src/index.js",
     "test": "node --test test/index.test.js"
   },
+  "keywords": [],
   "engines": {
     "node": ">=20.0.0"
   },
