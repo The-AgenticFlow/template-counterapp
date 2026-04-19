@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Counter App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f0f2f5;
+      color: #1a1a2e;
+    }
+
+    .counter-container {
+      text-align: center;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 48px 64px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 32px;
+      color: #4a4a6a;
+      font-weight: 600;
+    }
+
+    .count-display {
+      font-size: 5rem;
+      font-weight: 700;
+      margin: 24px 0;
+      color: #1a1a2e;
+      min-width: 120px;
+      display: inline-block;
+      transition: opacity 0.2s ease;
+    }
+
+    .count-display.loading {
+      opacity: 0.4;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+
+    button {
+      font-size: 2rem;
+      font-weight: 700;
+      width: 72px;
+      height: 72px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease, opacity 0.2s ease;
+      color: #ffffff;
+    }
+
+    button:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    button.increment {
+      background-color: #2ecc71;
+    }
+
+    button.increment:hover:not(:disabled) {
+      background-color: #27ae60;
+    }
+
+    button.decrement {
+      background-color: #e74c3c;
+    }
+
+    button.decrement:hover:not(:disabled) {
+      background-color: #c0392b;
+    }
+
+    .error-message {
+      margin-top: 24px;
+      color: #e74c3c;
+      font-size: 0.9rem;
+      min-height: 1.4em;
+      transition: opacity 0.2s ease;
+    }
+
+    .status-indicator {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="counter-container">
+    <h1>Counter</h1>
+    <div class="count-display" id="count">&mdash;</div>
+    <div class="button-group">
+      <button class="decrement" id="decrement-btn" aria-label="Decrement counter">&minus;</button>
+      <button class="increment" id="increment-btn" aria-label="Increment counter">+</button>
+    </div>
+    <div class="error-message" id="error"></div>
+    <div class="status-indicator" id="status"></div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3001/api/counter';
+
+    const countEl = document.getElementById('count');
+    const incrementBtn = document.getElementById('increment-btn');
+    const decrementBtn = document.getElementById('decrement-btn');
+    const errorEl = document.getElementById('error');
+    const statusEl = document.getElementById('status');
+
+    let loading = false;
+
+    function setLoading(state) {
+      loading = state;
+      incrementBtn.disabled = state;
+      decrementBtn.disabled = state;
+      countEl.classList.toggle('loading', state);
+      statusEl.textContent = state ? 'Updating\u2026' : '';
+    }
+
+    function showError(message) {
+      errorEl.textContent = message;
+    }
+
+    function clearError() {
+      errorEl.textContent = '';
+    }
+
+    async function fetchCount() {
+      try {
+        setLoading(true);
+        clearError();
+        const response = await fetch(API_BASE);
+        if (!response.ok) {
+          throw new Error('Server returned ' + response.status);
+        }
+        const data = await response.json();
+        countEl.textContent = data.count;
+      } catch (err) {
+        showError('Failed to fetch count: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function increment() {
+      try {
+        setLoading(true);
+        clearError();
+        const response = await fetch(API_BASE + '/increment', { method: 'POST' });
+        if (!response.ok) {
+          throw new Error('Server returned ' + response.status);
+        }
+        const data = await response.json();
+        countEl.textContent = data.count;
+      } catch (err) {
+        showError('Failed to increment: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function decrement() {
+      try {
+        setLoading(true);
+        clearError();
+        const response = await fetch(API_BASE + '/decrement', { method: 'POST' });
+        if (!response.ok) {
+          throw new Error('Server returned ' + response.status);
+        }
+        const data = await response.json();
+        countEl.textContent = data.count;
+      } catch (err) {
+        showError('Failed to decrement: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    incrementBtn.addEventListener('click', increment);
+    decrementBtn.addEventListener('click', decrement);
+
+    // Fetch initial count on page load
+    fetchCount();
+  </script>
+</body>
+</html>
